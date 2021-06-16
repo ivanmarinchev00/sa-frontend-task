@@ -5,34 +5,76 @@
     <input type="file" @change="onFileSelected" />
 
     <div id="preview">
-    <img v-if="url" :src="url" />
-  </div>
+      <img id="image" v-if="url" :src="url" />
+    </div>
   </div>
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref } from "vue";
 
 export default {
   name: "HelloWorld",
   props: {
-    msg: String
+    msg: String,
   },
 
-
   setup() {
-
-    var url = ref('')
+    var url = ref("");
 
     function onFileSelected(event) {
-      const file = event.target.files[0]
-      url.value = URL.createObjectURL(file)
+      const file = event.target.files[0];
+      url.value = URL.createObjectURL(file);
+      clasifyImage();
     }
+
+    function clasifyImage() {
+      const mobilenet = require("@tensorflow-models/mobilenet");
+      const image = document.getElementById("image");
+
+      mobilenet.load().then(model => {
+        // Classify the image.
+        model.classify(image).then((predictions) => {
+          console.log("Predictions: ");
+          console.log(predictions);
+        });
+      });
+
+      // const model = new Promise((resolve) => {
+      //   resolve(mobilenet.load());
+      // })
+      //   .then((response) => {
+      //     console.log(mobilenet + "MOBILENET");
+      //     return response.classify(image);
+      //   })
+      //   .then((result) => {
+      //     console.log(result + "Result HERE");
+      //     console.log(model);
+      //   });
+    }
+
+    // function setUpExternalScripts() {
+    //   let externalScript = document.createElement("script");
+    //   externalScript.setAttribute(
+    //     "src",
+    //     "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.1"
+    //   );
+    //   document.head.appendChild(externalScript);
+
+    //   let externalScript2 = document.createElement("script");
+    //   externalScript2.setAttribute(
+    //     "src",
+    //     "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@1.0.0"
+    //   );
+    //   document.head.appendChild(externalScript2);
+    // }
+
+    // onMounted(setUpExternalScripts);
 
     return {
       onFileSelected: onFileSelected,
-      url: url
-    }
+      url: url,
+    };
   },
 };
 </script>
@@ -62,5 +104,6 @@ a {
 #preview img {
   max-width: 100%;
   max-height: 500px;
+  margin-top: 2%;
 }
 </style>
